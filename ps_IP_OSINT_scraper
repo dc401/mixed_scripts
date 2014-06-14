@@ -1,0 +1,66 @@
+<#
+IP OSINT Scraper v1.0 - dchow[AT]xtecsystems.com 20140614
+This example script scrapes Ultratools and IPvoid for a particular IP compatible with PS 2.0+
+If you have PS 3.0+ you can use "Invoke-WebRequest" and others
+Examples usages and syntax taken from:
+http://tasteofpowershell.blogspot.com/2008/07/using-net-webclient-to-scrape-web-pages.html
+http://social.technet.microsoft.com/Forums/windowsserver/en-US/0fe5c95c-405f-46e4-9faf-238b28abfc85/difference-between-semicolon-and-newline
+http://msdn.microsoft.com/en-us/library/system.net.webclient.aspx
+http://www.neolisk.com/techblog/powershell-striphtmltagsfromastring
+#>
+
+#Take in an argument syntax ps_ipvoid_scraper.ps1 -ip 10.10.10.10
+Param([string]$ip)
+
+#Create a new .NET object so we can add the user agent so we don't get blocked
+$webClient = New-Object System.Net.WebClient;
+$webClient.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36");
+
+#Test or create dir for temp file path because webclient requires a full path
+$tmpPath = Test-Path "C:\temp"
+IF ($tmpPath = "False")
+	{
+	Write-Host "Creating temp folder for file cache."
+	mkdir "C:\temp"
+	}
+#Get IPVoid RBL Status
+$uriIPvoidBase = "http://www.ipvoid.com/scan/"
+$uriIPvoidString = $uriIPvoidBase + $ip
+$IPvoidOutFile = "C:\temp\ipvoid.html"
+
+#Destination String within DownloadFile requires full path
+$IPVoidResults = $webClient.DownloadFile($uriIPvoidString, $IPvoidOutFile);
+
+#Parse the status and clean up the HTML tags the hard way using regex
+$IPVoidrawStat =  Get-Content "C:\temp\ipvoid.html" | Select-String "Blacklist Status";
+$IPVoidcleanStat = $IPVoidrawStat -replace "<.*?>"
+Write-Host $uriIPvoidString
+Write-Host "IPVoid Results:"
+Write-Host $IPVoidcleanStat
+Write-Host ""
+#Get UltraTools ASN Info
+$uriUltratoolsBase = "https://www.ultratools.com/tools/asnInfoResult?domainName="
+$uriUltratoolsString = $uriUltratoolsBase + $ip
+$UltratoolsOutFile = "C:\temp\Ultratools.html"
+
+$UltratoolsResults = $webClient.DownloadFile($uriUltratoolsString, $UltratoolsOutFile);
+$UltratoolsrawStat = Get-Content "C:\temp\Ultratools.html" | Select-String "value";
+$UltratoolscleanStat = $UltratoolsrawStat -replace "<.*?>"
+
+Write-Host $uriUltratoolsString
+Write-Host "Ultratools Results:"
+Write-Host ""
+Write-Host $UltratoolscleanStat
+
+#Bsic DNS info using Google
+Write-Host ""
+Write-host "Nslookup Results:"
+nslookup $ip 8.8.8.8
+
+#Flush variables and temp files
+Remove-Item "C:\temp\ipvoid.html"
+Remove-Item "C:\temp\Ultratools.html"
+Clear-Variable -name uri* -scope Script
+Clear-Variable -name Ultratools* -scope Script
+Clear-Variable -name IPVoid* -scope Script
+Remove-Item "C:\temp\"
