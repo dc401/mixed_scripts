@@ -38,8 +38,8 @@ ufw disable
 #ip route add default gateway via 192.168.1.1
 #echo "nameserver 192.168.1.1" >> /etc/resolv.conf
 
-#Route DNS traffic to netsed
-iptables -t nat -A PREROUTING -i br0 -p udp --dport 53 -j REDIRECT --to-port 6969
+#Route traffic to netsed
+iptables -t nat -A PREROUTING -i br0 -p tcp --dport 6969 -j REDIRECT --to-port 1337
 
 #Straight route web traffic to mitmproxy no pipe
 iptables -t nat -A PREROUTING -i br0 -p tcp --dport 80 -j REDIRECT --to-port 8080
