@@ -17,7 +17,7 @@ If (Test-Path -isvalid $s)
 {
 	Try
 	{
-		.\sigcheck.exe -l -s -vt -v -h -c $path | Out-File hashes.csv -Append
+		.\sigcheck.exe -l -s -vt -v -h -c $s | Out-File hashes.csv -Append
 	}
 	Catch
 	{
