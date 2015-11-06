@@ -1,50 +1,48 @@
-Enter file contents here<#
-20141204 dc - v1.0 Converts emails to various AD attribute outputs and provides basic stats
-Meant mostly for the Metasploit phish campaigns for confirmed credentials
-20150831 dc - v1.0.1 Added direct report managers as the last column LDAP attributes
+<#
+20150911 dc - Compares a list of names fed to known male/female gender names
+from two different other lists and does a count and ratio of each
 
-Input Requirements: List of emails must be single line by line list in a text file
+Usage:
+GetGenderRatioPS.ps1 -i inPutofNames -m MaleList.txt -f FemaleList.txt
 
-Syntax: email2phish_stats.ps1 -i listofEmailsIn.txt -o UsersOutFile.csv -m ManagersOutFile.csv
-
-Modified from old one liner
-Get-ADUser -searchbase "OU=HCHD,DC=hchd,DC=local" -filter * -Properties sAMAccountName, department | Select-Object SamAccountName,Department | Where-Object {$_.Department -match "Corporate Compliance*" } | Export-Csv .\compliance.csv
+Using multiple Arrays with Switch Statements Ref:
+http://serverfault.com/questions/160258/powershell-switch-statement-with-multiple-values
+http://powershell.com/cs/blogs/ebookv2/archive/2012/03/06/chapter-7-conditions.aspx#switch
 
 #>
 
-#Argument check
-param([string]$i , [string]$o, [string]$m)
-Write-Host "Reading from: $i"
-Write-Host "Writing to: $o"
-Write-Host "Writing to: $m"
+#cli arguments
+param([string]$i, [string]$m, [string]$f);
 
-IF (Test-Path -isvalid $i)
+#grab into array
+$maleListArr = Get-Content $m.toString();
+$femaleListArr = Get-Content $f.toString();
+$inputListArr = Get-Content $i.toString();
+
+#zero out the counters
+[int]$mCounter = 0;
+[int]$fCounter = 0;
+[int]$uCounter = 0;
+
+#loop through your own list
+ForEach ($x in $inputListArr)
 {
-    #Lookup emails from file and expand dsquer/dsget properties to an array and export
-    import-module ActiveDirectory
-    Get-Content $i | Get-Unique | ForEach-Object {Get-ADUser -searchbase "OU=HCHD,DC=hchd,DC=local" -filter { EmailAddress -eq $_ } `
-    -Properties mail, sAMAccountName, department, title | Select-Object mail, SamAccountName,Department, title, manager} | Export-Csv -notype $o
-    
-    #Count emails list unique
-    $TotalUsers =  Get-Content $i | Get-Unique | Measure-Object | Select-Object "Count"
-    Write-Host "# Confirmed Users:" $TotalUsers -foregroundcolor red -backgroundcolor yellow
-    
-    #Parse the managerial positions and export
-    Get-Content $i | Get-Unique | ForEach-Object {Get-ADUser -searchbase "OU=HCHD,DC=hchd,DC=local" -filter { EmailAddress -eq $_ } `
-    -Properties mail, sAMAccountName, department, title, manager | Select-Object mail, SamAccountName,Department, title, manager} | `
-    Where-Object {$_.title -match "(Mgr|Manager|Dir|Director|Supervisor|President|VP|Chief)" } | Export-Csv -notype $m
-    
-    #Count manager emails list unique
-    $TotalManagers = Get-Content $m | Get-Unique | Measure-Object | Select-Object "Count"
-    Write-Host "# Confirmed Managers:" $TotalManagers -foregroundcolor red -backgroundcolor yellow
-    
-    Write-Host "Done."
-    #Beep to get your attention
-    $([char]7)
+    #switch statements (cases) are case insensitive by default
+    switch ($x)
+        {
+            #eval array and stop on first match via break
+            { $maleListArr -eq $_ } { [int]$mCounter++ ; break }
+            { $femaleListArr -eq $_ } { [int]$fCounter++ ; break }
+            default { $uCounter++ ; break }
+         }
 }
 
-ELSE
-{
-    Write-Host "Syntax: email2phish_stats.ps1 -i listofEmailsIn.txt -o UsersOutFile.csv -m ManagersOutFile.csv"
-    exit;
-}
+Write-Host "Males: $mCounter";
+Write-Host "Females: $fCounter";
+Write-Host "Unknown: $uCounter";
+
+#Ratio the counters
+$ratio = $mCounter/$fCounter;
+
+Write-Host "M/F Ratio: $ratio";
+exit;
