@@ -1,4 +1,10 @@
-#dchow[AT]xtecsystems.com
+<#
+dchow[AT]xtecsystems.com
+Visit us online at: www.xtecsystems.com
+Xtec Systems is now SCIS Security
+This script is licensed under GPLv2
+#>
+
 #Warning: This tool is meant to be used as a last resort. Consider eDiscovery specific tools.
 #Notice: This tool is limited by the .NET objects of 260 characters within NTFS
 #There is NO warranty on this tool.
