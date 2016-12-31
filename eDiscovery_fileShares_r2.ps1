@@ -1,4 +1,7 @@
 ﻿#dchow[AT]xtecsystems.com
+#Warning: This tool is meant to be used as a last resort. Consider eDiscovery specific tools.
+#Notice: This tool is limited by the .NET objects of 260 characters within NTFS
+#There is NO warranty on this tool.
 <#eDiscovery String Search and Copy files to a specific destination that Match
  For PS v3 and higher. Recommended on PS v5 however 20161227 dc
  *Notice* IOPS performance runs best when not ran from a cmd.exe wrapper
