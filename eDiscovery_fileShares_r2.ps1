@@ -15,6 +15,9 @@
     Fixed memory exhaustion problem that not loading recurse dir in memory. (May impact indexing performance though)
     Changed copy mechanism to robocopy.exe
 
+ vR2 (1.3) - Changelog 20161231 dc
+    Added explicit exclusion for GCI not to follow symlinks or junctions
+
 #>
 
 #Version Check
@@ -23,9 +26,9 @@ If ( $PSVersionTable.PSVersion.Major -ge 3)
     #Collect user input
     [string]$stringInput = Read-Host -prompt "Enter string or regex to search for e.g. foo"
     Write-Host "You entered $stringInput" -foregroundcolor green -backgroundcolor black
-    [string]$startDateInput = Read-Host -prompt "Enter START search date range (CREATED DATE) MM/DD/YYYY"
+    [string]$startDateInput = Read-Host -prompt "Enter START search date range (MODIFIED DATE) MM/DD/YYYY"
     Write-Host "You entered $startDateInput" -foregroundcolor green -backgroundcolor black
-    [string]$endDateInput = Read-Host -prompt "Enter END search date range (CREATED DATE) MM/DD/YYYY"
+    [string]$endDateInput = Read-Host -prompt "Enter END search date range (MODIFIED DATE) MM/DD/YYYY"
     Write-Host "You entered $endDateInput" -foregroundcolor green -backgroundcolor black
     [string]$pathInput = Read-Host -Prompt "Enter the base path to start search from e.g. H:\*.* or \\foo\bar"
     Write-Host "You entered $pathInput" -foregroundcolor green -backgroundcolor black
@@ -40,7 +43,7 @@ If ( $PSVersionTable.PSVersion.Major -ge 3)
     Try
     {
         Write-Host "Searching for $stringInput in files starting in $pathInput" -foregroundcolor green -backgroundcolor black
-        Write-Host "Constraints Create Date Range: $startDateInput through $endDateInput" -foregroundcolor green -backgroundcolor black
+        Write-Host "Constraints Modified Date Range: $startDateInput through $endDateInput" -foregroundcolor green -backgroundcolor black
         <#
         Get-ChildItem -Path "$pathInput" -Recurse |Where-Object { $_.CreationTime -gt "$startDateInput" -and $_.CreationTime -le "$endDateInput" } `
         | Select-String -Pattern $stringInput | ForEach { $_.Path } | Get-Unique | Tee-Object -FilePath $logsOut -Append
@@ -48,8 +51,9 @@ If ( $PSVersionTable.PSVersion.Major -ge 3)
 
         #ForEach-Object stream to memory rather that front load. I/O performance may suffer
         #However the trade up is optimization so you do not exhaust the default 1 GB allocated to each PS console instance
-        Get-ChildItem -Path "$pathInput" -Recurse | ForEach-Object {
-            If ( ($_.LastCreateTime -gt "$startDateInput" -and $_.LastCreateTime -le "$endDateInput"))
+        #Added "!ReparsePoint" for explicitly excluding following sym links
+        Get-ChildItem -Path "$pathInput" -Recurse -Attributes !ReparsePoint | ForEach-Object {
+            If ( ($_.LastWriteTime -gt "$startDateInput" -and $_.LastWriteTime -le "$endDateInput"))
             {
                 #Added where-object clause to not equal InputStream because pipe gets broken with if statement
                 #$_ | Select-String -Pattern $stringInput | ForEach-Object { $_.Path } | Get-Unique | Tee-Object -FilePath $logsOut -Append
