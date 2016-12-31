@@ -1,4 +1,4 @@
-﻿#dchow[AT]xtecsystems.com
+#dchow[AT]xtecsystems.com
 #Warning: This tool is meant to be used as a last resort. Consider eDiscovery specific tools.
 #Notice: This tool is limited by the .NET objects of 260 characters within NTFS
 #There is NO warranty on this tool.
@@ -11,7 +11,7 @@
     Changed Hashing to MD5 for performance purposes
     Added check to see if PS v5 is installed
 
- vR2 (1.2) - Changelog 20161229 dc
+ vR2 (1.2) - Changelog 20161230 dc
     Fixed memory exhaustion problem that not loading recurse dir in memory. (May impact indexing performance though)
     Changed copy mechanism to robocopy.exe
 
@@ -49,9 +49,12 @@ If ( $PSVersionTable.PSVersion.Major -ge 3)
         #ForEach-Object stream to memory rather that front load. I/O performance may suffer
         #However the trade up is optimization so you do not exhaust the default 1 GB allocated to each PS console instance
         Get-ChildItem -Path "$pathInput" -Recurse | ForEach-Object {
-            If ( ($_.CreationTime -gt "$startDateInput" -and $_.CreationTime -le "$endDateInput"))
+            If ( ($_.LastCreateTime -gt "$startDateInput" -and $_.LastCreateTime -le "$endDateInput"))
             {
-                $_ | Select-String -Pattern $stringInput | ForEach { $_.Path } | Get-Unique | Tee-Object -FilePath $logsOut -Append
+                #Added where-object clause to not equal InputStream because pipe gets broken with if statement
+                #$_ | Select-String -Pattern $stringInput | ForEach-Object { $_.Path } | Get-Unique | Tee-Object -FilePath $logsOut -Append
+                $_ | Select-String -Pattern $stringInput | ForEach-Object { $_.Path } | Get-Unique `
+                | Where-Object { $_ -ne 'InputStream' } | Tee-Object -FilePath $logsOut -Append
             }
         }
     }
@@ -60,7 +63,6 @@ If ( $PSVersionTable.PSVersion.Major -ge 3)
         Write-Host "An error condition has occured. Please check your inputs." -foregroundcolor red -backgroundcolor yellow
         echo $_.Exception | Format-List -Force
     }
-
 
     #Copy files enumerated from list to destination
     Try
