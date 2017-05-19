@@ -95,16 +95,17 @@ If ( $PSVersionTable.PSVersion.Major -ge 3)
             #Extrapolate unknown fileypes
             Import-Csv .\HighEntropyResults.csv -Header Path,Type,Entropy | ForEach-Object `
             {
-                If ( $_.Type -like "*unknown*" )
+                If ( ($_.Type -like "*unknown*") -or ($_.Type -like "*Non-ISO extended*") )
                 {
                     #Write-Host $_.Path $_.Type "SUSPICIOUS"
-                    $SuspiciousEncryptedFiles = $_.Path + ',' + $_Type + ',' + $_.Entropy
+                    $SuspiciousEncryptedFiles = $_.Path + ',' + $_.Type + ',' + $_.Entropy
                     Write-Host $SuspiciousEncryptedFiles
-                    $SuspiciousEncryptedFiles | Out-File -Appends 'SuspectRansomEncryptedFiles.csv'
+                    $SuspiciousEncryptedFiles | Out-File -Append 'SuspectRansomEncryptedFiles.csv'
                     $position++
                     Write-Progress -Activity "Looking unknown data magic types" -Status "Progress:" `
                     -PercentComplete ( ($position / $totalCount) * 100 )
                 }
+
             }
         }
     
@@ -115,10 +116,10 @@ If ( $PSVersionTable.PSVersion.Major -ge 3)
         }
 
     #Cleanup
-    rm .\entropy-results.csv
+    #rm .\entropy-results.csv
 
     Write-Host "Result log files are located in same directory as the following:" -ForegroundColor Yellow -BackgroundColor Black
-    #Write-Host "entropy-results.csv" -ForegroundColor Green -BackgroundColor Black
+    Write-Host "entropy-results.csv" -ForegroundColor Green -BackgroundColor Black
     Write-Host "HighEntropyResults.csv" -ForegroundColor Green -BackgroundColor Black
     Write-Host "SuspectRansomEncryptedFiles.csv" -ForegroundColor Green -BackgroundColor Black
 
