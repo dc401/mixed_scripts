@@ -14,7 +14,7 @@ while($true)
         { 
             Write-Host "$i works"
         } 
-        if ($inetstatus.TcpTestSucceeded -eq 0)
+        elseif ($inetstatus.TcpTestSucceeded -eq 0)
         { 
             Write-Host "$i failed"; "failed" | Out-File -Append status.txt
         }
