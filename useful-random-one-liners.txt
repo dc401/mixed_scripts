@@ -1,0 +1,10 @@
+Searching shares:
+gci -Recurse -Path \\<host>\<folder> -Exclude "*.dll", "*.exe" –ErrorAction SilentlyContinue | Select-String -Pattern "password", "social security"
+
+
+Cut CSV of Tenable Nessus Columns to Nmap Re-Scanning
+import-csv .\unique-oldweakTLS-IPlist.csv | ForEach-Object { Write-Host "testing: $_"; nmap -Pn -sV --script ssl-enum-ciphers.nse -p $_.port $_.ip --open >> output.log }
+
+Bash force service reload if it keeps dying
+while sleep 10; do if [ `systemctl is-active vncserver` == "inactive" ]; then echo "down" && eval ("systemctl start vncserver@1 &"; fi; sleep 1; done
+
