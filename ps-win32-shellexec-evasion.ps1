@@ -52,6 +52,8 @@ $encrypted = @()
 
 $commandstring = ""
 
+$signal = @( 3,13,4,99,5,24,5 )
+
 #start the encryption routine on the signal array
 
 for ($i=0; $i -lt $signal.Count; $i++) { $result = (encryptArr $signal[$i] 2); $encrypted = $encrypted + $result }
