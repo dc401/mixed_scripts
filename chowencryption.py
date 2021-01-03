@@ -67,7 +67,7 @@ def chowencrypt(cleartext, key):
         cipherstream.append(encryptedbyte)
 
     print('encrypted string: ' + str(cipherstream))
-    #Remember this wil return as a LIST data type
+    #Remember this will return as a LIST data type
 
     #writing to a file for ease of use instead of copy/paste from std out
     print('***writing encrypted list to file... encrypted.txt***')
