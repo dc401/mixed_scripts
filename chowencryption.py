@@ -51,9 +51,8 @@ def chowencrypt(cleartext, key):
     #use an IV with a smaller size helps to blend the cipher text more
     iv = randint(311, 457)
 
-    #Start encoding our clear text and prepend IV
+    #Start encoding our clear text
     encodedbuffer = []
-    encodedbuffer.append(iv)
     for i in str(cleartext):
         encodedbuffer.append(encodeddict[i])
     print('encoded string: ' + str(encodedbuffer))
@@ -62,8 +61,13 @@ def chowencrypt(cleartext, key):
     #Use encryption algo to convert encoded data to cipher text
     #Weak algo: 3x + key for demo purposes
     cipherstream = []
+
+    #Prepend the IV first unencrypted so it will be used in combination with the key
+    cipherstream.append(iv)
+    #Our new key is the composite addition of iv + key
+    compositekey = iv + int(key)
     for i in encodedbuffer:
-        encryptedbyte = (3 * i) + int(key)
+        encryptedbyte = (3 * i) + int(compositekey)
         cipherstream.append(encryptedbyte)
 
     print('encrypted string: ' + str(cipherstream))
@@ -141,8 +145,13 @@ def chowdecrypt(ciphertext, key):
     #Use decryption algo which is inverse: (3x+key)^-1
     #Decryption algo: (x-k)/3
     decryptedsignal = []
+
+    #We need to read the 'cleartext' IV in the first element of the list
+    #The IV will combine with the user specified key to provide appropriate stream decrypt
+    readiv = encodedbuffer[0]
+    compositekey = int(readiv) + int(key)
     for i in encodedbuffer:
-        decryptedsignal.append(int((i - int(key)) / 3))
+        decryptedsignal.append(int((i - int(compositekey)) / 3))
     print('decrypted signal: ' + str(decryptedsignal))
     
     #Return the decrypted codes to the original ASCII equiv
