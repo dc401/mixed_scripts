@@ -5,6 +5,7 @@
 #dchow[AT]xtecsystems.com
 
 #import libraries you may need pip3 install flask-restful
+#windows users may also need to do a pip3 install pyopenssl
 from flask import Flask, jsonify, request
 import os, ssl
 
