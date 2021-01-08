@@ -8,11 +8,6 @@
 from flask import Flask, jsonify, request
 import os, ssl
 
-#use ssl library to add ssl capabilities
-#requires openssl ca chain and private key creation
-#context = ssl.SSLContext()
-#context.load_cert_chain('/path/to/certchain.pem', '/path/to/private.pem')
-
 #flask app instance 
 app = Flask(__name__)
 
@@ -41,7 +36,5 @@ def shell(userinput):
 
 #driver main function driver
 if __name__ == '__main__':
-    #uncomment ssl context after generating certs adhoc mode works too
-    #app.run(host="0.0.0.0", port=int("389"), debug = True, ssl_context=context)
     app.run(host="0.0.0.0", port=int("389"), debug = True, ssl_context='adhoc')
     #app.run()
