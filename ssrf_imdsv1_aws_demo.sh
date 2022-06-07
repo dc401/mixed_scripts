@@ -11,3 +11,4 @@ wget -O /tmp/ssrf_html.php 'https://raw.githubusercontent.com/dc401/mixed_script
 cp /tmp/phpinfo.php /var/www/html/
 cp /tmp/ssrf_html.php /var/www/html/
 systemctl start httpd
+systemctl enable http
