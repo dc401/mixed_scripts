@@ -8,9 +8,11 @@
 # Alternatively use jq e.g. jq -r '.[] | {textPayload} | select(.textPayload != null) | .textPayload'  ./downloaded-logs.json > payload-hexdump.text
 
 #!/usr/bin/env python3
-import binascii, hashlib
+import binascii, hashlib, os
 from google.cloud import logging
 
+#grab GCP service account JWT
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="<YOUR/PATH/SERVICEACCOUNT.json>"
 
 #read file in and hash in 4K chunks SHA256
 sha256_hash = hashlib.sha256()
@@ -25,7 +27,21 @@ with open('dog-image.jpeg', 'rb') as input_file:
 print("Char count: " +str(payload_count))
 print("SHA256: " + hash_value)
 
+
 #gcp cloud logging client
 logging_client = logging.Client()
 logger = logging_client.logger("foobar-logname")
-logger.log_text("foobar-test")
+logger.log_text(str(payload_hex))
+print('finished uploading payload. check logs explorer for binary hex stream.')
+
+'''
+
+#write out to file
+with open('binary_out.jpeg', 'wb') as out_file:
+    out_file.write(bin_payload)
+out_file.close()
+
+#conver hext to binary payload again
+bin_payload = binascii.unhexlify(payload_hex)
+#print(bin_payload)
+'''
